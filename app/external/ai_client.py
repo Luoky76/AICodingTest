@@ -61,7 +61,7 @@ async def extract_order_data(raw_text: str) -> ExtractedOrderData:
 
 async def _call_ai_api(raw_text: str) -> ExtractedOrderData:
     """Call the Deepseek AI API for order extraction."""
-    async with httpx.AsyncClient(timeout=settings.PROCESSING_TIMEOUT) as client:
+    async with httpx.AsyncClient(timeout=settings.AI_API_TIMEOUT) as client:
         response = await client.post(
             settings.AI_API_URL,
             headers={
@@ -81,9 +81,17 @@ async def _call_ai_api(raw_text: str) -> ExtractedOrderData:
         response.raise_for_status()
         result = response.json()
 
-    # Extract the AI response content
-    content = result["choices"][0]["message"]["content"]
-    data = json.loads(content)
+    # Extract and validate the AI response
+    try:
+        choices = result.get("choices")
+        if not choices or not isinstance(choices, list):
+            raise ValueError("AI API returned no choices")
+        content = choices[0].get("message", {}).get("content", "")
+        if not content:
+            raise ValueError("AI API returned empty content")
+        data = json.loads(content)
+    except (json.JSONDecodeError, ValueError) as e:
+        raise RuntimeError(f"Failed to parse AI response: {e}")
 
     return ExtractedOrderData(
         customerName=data.get("customerName", ""),

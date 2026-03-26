@@ -24,8 +24,11 @@ class Settings:
     # Use mock external services when real APIs are not configured
     USE_MOCK_SERVICES: bool = os.getenv("USE_MOCK_SERVICES", "true").lower() == "true"
 
-    # Processing timeout in seconds (AI API calls may need more time)
-    PROCESSING_TIMEOUT: float = float(os.getenv("PROCESSING_TIMEOUT", "30.0"))
+    # Processing timeout in seconds
+    PROCESSING_TIMEOUT: float = float(os.getenv("PROCESSING_TIMEOUT", "5.0"))
+
+    # AI API timeout in seconds (AI calls typically need more time)
+    AI_API_TIMEOUT: float = float(os.getenv("AI_API_TIMEOUT", "30.0"))
 
 
 settings = Settings()

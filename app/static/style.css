@@ -10,27 +10,20 @@ body {
     background: #f0f2f5;
     color: #333;
     line-height: 1.6;
-}
-
-.container {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 20px;
+    min-height: 100vh;
 }
 
 /* Header */
 header {
     text-align: center;
-    margin-bottom: 30px;
-    padding: 20px;
+    padding: 20px 30px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 12px;
     color: white;
 }
 
 header h1 {
     font-size: 1.8em;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 
 .subtitle {
@@ -38,23 +31,56 @@ header h1 {
     opacity: 0.9;
 }
 
+/* Main two-column layout */
+.main-layout {
+    display: flex;
+    gap: 24px;
+    padding: 24px;
+    max-width: 1600px;
+    margin: 0 auto;
+    align-items: flex-start;
+}
+
+.panel {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.panel-input {
+    flex: 1;
+    min-width: 0;
+}
+
+.panel-output {
+    flex: 1;
+    min-width: 0;
+}
+
+.panel-title {
+    padding: 16px 20px;
+    font-size: 1.1em;
+    color: #1e293b;
+    border-bottom: 1px solid #e5e7eb;
+    background: #f8fafc;
+}
+
 /* Tabs */
 .tabs {
     display: flex;
     gap: 4px;
-    margin-bottom: 0;
     background: #e2e8f0;
-    border-radius: 12px 12px 0 0;
     padding: 4px 4px 0;
 }
 
 .tab {
     flex: 1;
-    padding: 12px 16px;
+    padding: 10px 14px;
     border: none;
     background: transparent;
     color: #64748b;
-    font-size: 0.95em;
+    font-size: 0.9em;
     cursor: pointer;
     border-radius: 8px 8px 0 0;
     transition: all 0.2s;
@@ -75,11 +101,7 @@ header h1 {
 /* Tab Content */
 .tab-content {
     display: none;
-    background: white;
-    padding: 24px;
-    border-radius: 0 0 12px 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    margin-bottom: 24px;
+    padding: 20px;
 }
 
 .tab-content.active {
@@ -177,10 +199,27 @@ header h1 {
     gap: 10px;
 }
 
+/* Placeholder */
+.placeholder {
+    text-align: center;
+    padding: 60px 20px;
+    color: #9ca3af;
+}
+
+.placeholder-icon {
+    font-size: 3em;
+    margin-bottom: 12px;
+    opacity: 0.5;
+}
+
+.placeholder p {
+    font-size: 0.95em;
+}
+
 /* Loading */
 .loading {
     text-align: center;
-    padding: 40px;
+    padding: 60px 20px;
 }
 
 .spinner {
@@ -199,12 +238,7 @@ header h1 {
 
 /* Results */
 .results {
-    margin-top: 24px;
-}
-
-.results h2 {
-    margin-bottom: 16px;
-    color: #1e293b;
+    padding: 20px;
 }
 
 .status-badge {
@@ -242,11 +276,10 @@ header h1 {
 }
 
 .result-card {
-    background: white;
+    background: #f8fafc;
     border: 1px solid #e5e7eb;
     border-radius: 10px;
     padding: 16px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
 .result-card table {
@@ -258,14 +291,15 @@ header h1 {
 .result-card td {
     text-align: left;
     padding: 8px 12px;
-    border-bottom: 1px solid #f3f4f6;
+    border-bottom: 1px solid #e5e7eb;
     font-size: 0.9em;
 }
 
 .result-card th {
     color: #6b7280;
     font-weight: 500;
-    width: 140px;
+    width: 120px;
+    white-space: nowrap;
 }
 
 .suggestion {
@@ -296,7 +330,7 @@ header h1 {
 }
 
 .items-table th {
-    background: #f8fafc;
+    background: #eef2ff;
     font-weight: 600;
     color: #475569;
 }
@@ -331,7 +365,7 @@ header h1 {
     border: 1px solid #fecaca;
     border-radius: 10px;
     padding: 20px;
-    margin-top: 20px;
+    margin: 20px;
 }
 
 .error h3 {
@@ -343,10 +377,12 @@ header h1 {
     color: #b91c1c;
 }
 
-/* Responsive */
-@media (max-width: 600px) {
-    .container {
-        padding: 10px;
+/* Responsive: stack on small screens */
+@media (max-width: 900px) {
+    .main-layout {
+        flex-direction: column;
+        padding: 12px;
+        gap: 16px;
     }
 
     header h1 {

@@ -1,17 +1,47 @@
 """AI client for order information extraction.
 
-Calls external AI API to convert raw text into structured order data.
+Calls the Deepseek AI API to convert raw text into structured order data.
 When USE_MOCK_SERVICES is enabled, uses a simple rule-based mock.
 """
 
 from __future__ import annotations
 
+import json
 import re
 
 import httpx
 
 from app.config import settings
 from app.models.schemas import ExtractedOrderData, OrderItem
+
+# System prompt instructing the AI to extract order information
+_SYSTEM_PROMPT = """你是一个专业的订单信息提取助手。你的任务是从用户提供的非结构化文本中提取订单信息。
+
+请严格按照以下JSON格式返回结果，不要包含任何其他文字、解释或markdown标记：
+{
+  "customerName": "客户名称（字符串）",
+  "items": [
+    {
+      "productCode": "产品编码（字符串）",
+      "quantity": 数量（数字）,
+      "price": 单价（数字）
+    }
+  ],
+  "deliveryDate": "交付日期（字符串，格式YYYY-MM-DD）",
+  "confidence": 置信度（0到1之间的数字，表示你对提取结果的信心程度）
+}
+
+提取规则：
+1. customerName: 提取客户/公司名称，如果找不到则返回空字符串
+2. items: 提取所有产品项目，包括产品编码、数量和单价
+3. deliveryDate: 提取交付日期，统一转为YYYY-MM-DD格式，如果找不到则返回空字符串
+4. confidence: 根据信息完整度给出0-1的置信度评分：
+   - 1.0: 所有字段都能明确提取
+   - 0.8-0.99: 大部分字段可以提取，少量信息需要推断
+   - 0.5-0.79: 部分字段缺失或不确定
+   - 0.0-0.49: 大量信息缺失，提取结果不可靠
+
+只返回JSON，不要返回任何其他内容。"""
 
 
 async def extract_order_data(raw_text: str) -> ExtractedOrderData:
@@ -23,27 +53,51 @@ async def extract_order_data(raw_text: str) -> ExtractedOrderData:
     Returns:
         ExtractedOrderData with structured order information.
     """
-    if settings.USE_MOCK_SERVICES or not settings.AI_API_URL:
+    if settings.USE_MOCK_SERVICES or not settings.AI_API_KEY:
         return _mock_extract(raw_text)
 
     return await _call_ai_api(raw_text)
 
 
 async def _call_ai_api(raw_text: str) -> ExtractedOrderData:
-    """Call the real AI API."""
-    async with httpx.AsyncClient(timeout=settings.PROCESSING_TIMEOUT) as client:
+    """Call the Deepseek AI API for order extraction."""
+    async with httpx.AsyncClient(timeout=settings.AI_API_TIMEOUT) as client:
         response = await client.post(
             settings.AI_API_URL,
-            json={"rawText": raw_text},
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {settings.AI_API_KEY}",
+            },
+            json={
+                "model": settings.AI_MODEL,
+                "messages": [
+                    {"role": "system", "content": _SYSTEM_PROMPT},
+                    {"role": "user", "content": raw_text},
+                ],
+                "temperature": 0.1,
+                "response_format": {"type": "json_object"},
+            },
         )
         response.raise_for_status()
-        data = response.json()
+        result = response.json()
+
+    # Extract and validate the AI response
+    try:
+        choices = result.get("choices")
+        if not choices or not isinstance(choices, list):
+            raise ValueError("AI API returned no choices")
+        content = choices[0].get("message", {}).get("content", "")
+        if not content:
+            raise ValueError("AI API returned empty content")
+        data = json.loads(content)
+    except (json.JSONDecodeError, ValueError) as e:
+        raise RuntimeError(f"Failed to parse AI response: {e}")
 
     return ExtractedOrderData(
         customerName=data.get("customerName", ""),
         items=[OrderItem(**item) for item in data.get("items", [])],
         deliveryDate=data.get("deliveryDate", ""),
-        confidence=data.get("confidence", 0.0),
+        confidence=float(data.get("confidence", 0.0)),
     )
 
 

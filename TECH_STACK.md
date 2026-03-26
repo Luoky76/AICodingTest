@@ -63,4 +63,4 @@
 ```
 
 ## Python 版本
-- Python >= 3.13
+- Python >= 3.12

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>订单信息自动提取与验证助手</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📋 订单信息自动提取与验证助手</h1>
+            <p class="subtitle">自动解析邮件/Excel订单 → AI提取关键信息 → 数据校验 → 结果输出</p>
+        </header>
+
+        <!-- Tab Navigation -->
+        <div class="tabs">
+            <button class="tab active" data-tab="email">📧 邮件输入</button>
+            <button class="tab" data-tab="excel">📊 Excel上传</button>
+            <button class="tab" data-tab="json">🔧 JSON输入</button>
+        </div>
+
+        <!-- Email Input Tab -->
+        <div class="tab-content active" id="tab-email">
+            <form id="email-form">
+                <div class="form-group">
+                    <label for="email-subject">邮件主题</label>
+                    <input type="text" id="email-subject" name="subject"
+                           placeholder="例如：订单 - Acme Corp - 2024年3月">
+                </div>
+                <div class="form-group">
+                    <label for="email-body">邮件正文</label>
+                    <textarea id="email-body" name="body" rows="8"
+                              placeholder="粘贴邮件正文内容...&#10;&#10;例如：&#10;客户: Acme Corp&#10;交付日期: 2024-06-15&#10;&#10;产品列表：&#10;PROD-001 | 10 | 99.99&#10;PROD-002 | 5 | 49.99"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="email-attachment">附件（可选，支持Excel）</label>
+                    <input type="file" id="email-attachment" name="attachment"
+                           accept=".xlsx,.xls">
+                </div>
+                <button type="submit" class="btn btn-primary">🚀 处理订单</button>
+            </form>
+        </div>
+
+        <!-- Excel Upload Tab -->
+        <div class="tab-content" id="tab-excel">
+            <form id="excel-form">
+                <div class="form-group">
+                    <label for="excel-file">选择Excel文件</label>
+                    <div class="file-upload">
+                        <input type="file" id="excel-file" name="file"
+                               accept=".xlsx,.xls" required>
+                        <p class="hint">支持 .xlsx 和 .xls 格式</p>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">🚀 处理订单</button>
+            </form>
+        </div>
+
+        <!-- JSON Input Tab -->
+        <div class="tab-content" id="tab-json">
+            <form id="json-form">
+                <div class="form-group">
+                    <label for="json-input">JSON数据</label>
+                    <textarea id="json-input" rows="12" placeholder='输入JSON格式数据...
+
+{
+  "type": "email",
+  "subject": "订单 - Acme Corp",
+  "body": "客户: Acme Corp\n交付日期: 2024-06-15\n\nPROD-001 | 10 | 99.99\nPROD-002 | 5 | 49.99",
+  "attachments": []
+}'></textarea>
+                </div>
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary">🚀 处理订单</button>
+                    <button type="button" class="btn btn-secondary" id="fill-sample">📝 填充示例</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div class="loading" id="loading" style="display: none;">
+            <div class="spinner"></div>
+            <p>正在处理订单...</p>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results" id="results" style="display: none;">
+            <h2>📊 处理结果</h2>
+
+            <!-- Status Badge -->
+            <div class="status-badge" id="status-badge"></div>
+
+            <!-- Extracted Data -->
+            <div class="result-section">
+                <h3>🔍 提取的订单数据</h3>
+                <div class="result-card" id="extracted-data"></div>
+            </div>
+
+            <!-- Validation Result -->
+            <div class="result-section">
+                <h3>✅ 校验结果</h3>
+                <div class="result-card" id="validation-result"></div>
+            </div>
+
+            <!-- Suggestion -->
+            <div class="result-section">
+                <h3>💡 建议</h3>
+                <div class="result-card suggestion" id="suggestion"></div>
+            </div>
+
+            <!-- Raw JSON -->
+            <details class="raw-json">
+                <summary>查看原始JSON响应</summary>
+                <pre id="raw-json"></pre>
+            </details>
+        </div>
+
+        <!-- Error Section -->
+        <div class="error" id="error" style="display: none;">
+            <h3>❌ 处理失败</h3>
+            <p id="error-message"></p>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
